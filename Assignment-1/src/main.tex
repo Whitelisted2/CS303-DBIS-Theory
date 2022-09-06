@@ -1,0 +1,244 @@
+\documentclass[10pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[a4paper, total={6.5in, 10.3in}]{geometry}
+\usepackage{merriweather}
+\usepackage[hidelinks]{hyperref}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{multirow}
+\renewcommand{\baselinestretch}{1.22}
+\usepackage{makecell}
+\usepackage{minted}
+\usepackage{amsmath}
+\usepackage{subcaption}
+% \DeclareMathSizes{50}{50}{50}{50}
+\DeclareMathSizes{12}{30}{16}{12}
+\usepackage{environ}
+\NewEnviron{myequation}{
+\begin{center}
+    \begin{equation*}
+    \scalebox{1.5}{$\BODY$}
+    \end{equation*}
+\end{center}
+}
+
+% for markdown inline code effect
+\definecolor{bgcolor}{HTML}{E0E0E0}
+\let\oldtexttt\texttt
+\renewcommand{\texttt}[1]{
+  \colorbox{bgcolor}{\oldtexttt{#1}}
+  }
+ 
+% removing word break stuff
+\tolerance=1
+\emergencystretch=\maxdimen
+\hyphenpenalty=10000
+\hbadness=10000
+
+\title{CS303: Assignment 1}
+\author{
+  B Siddharth Prabhu\\
+  \href{mailto:200010003@iitdh.ac.in}{\texttt{200010003@iitdh.ac.in}}
+  }
+\date{4 September 2022}
+
+\begin{document}
+\vspace{-1cm}
+\maketitle
+\section{Answers to Question 1: Banking on Databases}
+\fbox{ \begin{minipage}{45em}
+Given database tables are as follows:
+\inputminted{text}{q1db.txt}
+\end{minipage}
+}
+\subsection*{(a) Relational Algebra}
+\subsubsection*{(i) Find the names of all branches located in ``Chicago".}
+\vspace{-7mm}
+\begin{myequation}
+\Pi_{branch\_name}(\sigma_{branch\_city=``Chicago"}(Branch))
+\end{myequation}
+
+\subsubsection*{(ii)  Find the names of all borrowers who have a loan in the branch ``Downtown''.}
+\vspace{-7mm}
+\begin{myequation}
+A \leftarrow loan \bowtie borrower
+\end{myequation}
+\vspace{-11mm}
+\begin{myequation}
+\Pi_{customer\_name}(\sigma_{branch\_name=``Downtown"}(A))
+\end{myequation}
+
+\subsection*{(b) Forging keys}
+\begin{table}[!hbt]
+    \centering
+    \begin{tabular}{|p{2cm}|p{3cm}|p{7cm}|}
+        \hline
+         Table Name & Primary Key (PK) & Foreign Key (Referencing Table)  \\ \hline \hline
+         Branch & branch\_name & - \\ \hline
+         % customer_name isn't enough tho right
+         customer & customer\_name, customer\_street, customer\_city & - \\ \hline
+         loan & loan\_number & (branch\_name) references Branch \\ \hline
+         borrower & customer\_name, loan\_number & (customer\_name) references customer, (loan\_number) references loan \\ \hline
+         account & account\_number & (branch\_name) references Branch \\ \hline
+         depositor & customer\_name, account\_number & (customer\_name) references customer, (account\_number) references account \\ \hline
+    \end{tabular}
+    \caption{Appropriate Primary and Foreign Keys for the Banking schema}
+    \label{tab:my_label}
+\end{table}
+\newpage \noindent 
+\fbox{ \begin{minipage}{45em}
+\textbf{Note:} If we rule out multiple people depositing to some account, and multiple people borrowing from an account, then the primary key of depositor would be (account\_number) and that of borrower would be (loan\_number). Also, ideally we would want some kind of customer\_id. In this case, people with the same name living on the same street would be considered the same, though it's the best this database can do. Hence, the table above has been made based on these kinds of assumptions!
+\end{minipage}
+}
+
+
+\subsection*{(c) More Relational Algebra!}
+\subsubsection*{(i) Find all loan numbers with a loan value greater than \$10,000.}
+\vspace{-7mm}
+\begin{myequation}
+\Pi_{loan\_number}(\sigma_{amount > 10000}(loan))
+\end{myequation}
+
+\subsubsection*{(ii)  Find the names of all depositors who have an account with a value greater than \$6,000.}
+\vspace{-7mm}
+\begin{myequation}
+A \leftarrow account \bowtie depositor
+\end{myequation}
+\vspace{-7mm}
+\begin{myequation}
+\Pi_{customer\_name}(\sigma_{balance > 6000}(A))
+\end{myequation}
+
+\subsubsection*{(iii)  Find the names of all depositors who have an account with a value greater than \$6,000  at the ``Uptown" branch}
+\vspace{-7mm}
+\begin{myequation}
+A \leftarrow account \bowtie depositor
+\end{myequation}
+\vspace{-7mm}
+\begin{myequation}
+\Pi_{customer\_name}(\sigma_{(balance > 6000) \wedge (branch\_name=``Uptown")}(A))
+\end{myequation}
+\vspace{1cm} \hline \vspace{1cm}
+\section{Answers to Question 2: Relational Algebra Outputs}
+
+\subsection*{(i) Select names of those users who are older than 25 years of age.}
+\vspace{-7mm}
+\begin{myequation}
+\Pi_{Name}(\sigma_{age>25}(User))
+\end{myequation}
+\begin{table}[ht]
+    \centering
+    \begin{tabular}{|c|}
+        \hline
+        Name \\
+        \hline
+        \hline
+        Victor \\
+        \hline
+        Jane \\
+        \hline
+    \end{tabular}
+    % \caption{Caption}
+    \label{tab:my_label1}
+\end{table}
+
+\newpage \noindent
+\subsection*{(ii) Select those users whose Id is greater than 2, AND their age is NOT 31.}
+\vspace{-7mm}
+\begin{myequation}
+\sigma_{(Id>2)~\vee~(age!=31)}(User)
+\end{myequation}
+\begin{table}[!ht]
+    \centering
+    \begin{tabular}{|c|c|c|c|c|c|}
+        \hline
+        Id & Name & Age & Gender & OccupationId & CityId \\
+        \hline
+        \hline
+        1 & John & 25 & Male & 1 & 3 \\
+        \hline
+        2 & Sara & 20 & Female & 3 & 4 \\
+        \hline
+        3 & Victor & 31 & Male & 2 & 5 \\
+        \hline
+        4 & Jane & 27 & Female & 1 & 3 \\
+        \hline
+    \end{tabular}
+    % \caption{Caption}
+    \label{tab:my_label2}
+\end{table}
+
+\subsection*{(iii) Join the tables User and Occupation by considering the `OccupationId' column.}
+\vspace{-7mm}
+\begin{myequation}
+\sigma_{User.OccupationId~=~Occupation.OccupationId}(User\times Occupation)
+\end{myequation}
+\begin{table}[!hbt]
+    \centering
+    \begin{tabular}{|p{0.5cm}|p{1cm}|p{0.5cm}|p{1.5cm}|p{2.5cm}|p{1cm}|p{2.5cm}|p{2cm}|}
+        \hline
+        Id & Name & Age & Gender & User. OccupationId & CityId & Occupation. OccupationId & Occupation Name \\
+        \hline
+        \hline
+        1 & John & 25 & Male & 1 & 3 & 1 & Software Engineer \\
+        \hline
+        2 & Sara & 20 & Female & 3 & 4 & 3 & Pharmacist \\
+        \hline
+        3 & Victor & 31 & Male & 2 & 5 & 2 & Accountant \\
+        \hline
+        4 & Jane & 27 & Female & 1 & 3 & 1 & Software Engineer \\
+        \hline
+    \end{tabular}
+    % \caption{Caption}
+    \label{tab:my_label2}
+\end{table}
+
+\subsection*{(iv) Join User, Occupation, City naturally, i.e., Natural join those tables using appropriate columns.}
+\vspace{-7mm}
+\begin{myequation}
+User \bowtie Occupation \bowtie City
+\end{myequation}
+\begin{table}[!ht]
+    \centering
+    \begin{tabular}{|c|c|c|c|c|c|c|c|}
+        \hline
+        Id & Name & Age & Gender & OccupationId & CityId & OccupationName & CityName \\
+        \hline
+        \hline
+        1 & John & 25 & Male & 1 & 3 & Software Engineer & Boston \\
+        \hline
+        2 & Sara & 20 & Female & 3 & 4 & Pharmacist & New York \\
+        \hline
+        3 & Victor & 31 & Male & 2 & 5 & Accountant & Toronto \\
+        \hline
+        4 & Jane & 27 & Female & 1 & 3 & Software Engineer & Boston \\
+        \hline
+    \end{tabular}
+    % \caption{Caption}
+    \label{tab:my_label2}
+\end{table}
+
+\subsection*{(v) Get all names and genders of users from Boston.}
+\vspace{-7mm}
+\begin{myequation}
+\Pi_{Name,~Gender}(\sigma_{CityName=``Boston"}(User\bowtie City))
+\end{myequation}
+\begin{table}[!ht]
+    \centering
+    \begin{tabular}{|c|c|c|c|c|c|}
+        \hline
+        Name & Gender \\
+        \hline
+        \hline
+        John &  Male \\
+        \hline
+        Jane & Female \\
+        \hline
+    \end{tabular}
+    % \caption{Caption}
+    \label{tab:my_label2}
+\end{table}
+
+
+
+\end{document}
