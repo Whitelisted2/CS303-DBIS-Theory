@@ -1,0 +1,2 @@
+SELECT *
+FROM books NATURAL RIGHT OUTER JOIN publisher;
